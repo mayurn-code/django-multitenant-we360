@@ -65,11 +65,18 @@ class KeyCloakConnection:
                     data = {
                         "id": userdata["id"],
                         "username": userdata["username"],
-                        "email": userdata["email"]
+                        "email": userdata["email"],
+                        "attributes": userdata['attributes']['user_type']
                     }
                     return {
+                        "success": True,
                         "data": data,
                         "message": "User details found"
+                    }
+                else:
+                    return {
+                        "success": False,
+                        "message": "User details not found"
                     }
         except Exception as e:
             return {
@@ -125,7 +132,7 @@ class KeyCloakConnection:
                 ],
                 "realmRoles": ["owner"],
                 "requiredActions": [],
-                "attributes": {"user_type":"Admin"}
+                "attributes": {"user_type": "Admin"}
             }
             result = requests.post(url, json=payload, headers=headers)
 
@@ -133,7 +140,7 @@ class KeyCloakConnection:
                 user = KeyCloakConnection.get_user_details(self, username)
                 user_data = user['data']
                 return {
-                    "data":user_data,
+                    "data": user_data,
                     "status": True,
                     "message": "User created successfully"
                 }
@@ -169,7 +176,7 @@ class KeyCloakConnection:
             }
 
             result = requests.put(url, json=payload, headers=headers)
-            print(result, "update_user_email_verify_details")
+
             if result.status_code >= 200 and result.status_code < 300:
                 return {
                     "success": True,
@@ -319,6 +326,13 @@ class KeyCloakConnection:
         headers = {
             'Content-Type': 'application/x-www-form-urlencoded'
         }
+
+        userdetails = self.get_user_details(username) 
+        user_type = ''
+        if userdetails['success']:
+            user_type = userdetails['data']['attributes'][0]
+        else:
+            user_type = ''
         payload = {
             "username": username,
             "password": password,
@@ -329,9 +343,8 @@ class KeyCloakConnection:
         result = requests.post(url, data=payload, headers=headers)
         if result.status_code == 200:
             data = result.json()
-            return {"success": True,
-                    "data": data
-                    }
+            data.update({"user_type": user_type})
+            return {"success": True, "data": data}
         else:
             return {
                 "success": False,

@@ -163,7 +163,6 @@ class VerifySetUpAccount(APIView):
                                 return Response({"success": False, "status": 409, "message": "Your account is already verified"},
                                                 status.HTTP_409_CONFLICT)
                             else:
-                                print("signupuser",signupuser)
                                 signupuser.is_email_verified = True
                                 signupuser.save()
                                 signupuserid = signupuser.pk
@@ -250,7 +249,7 @@ class UserLoginView(APIView):
 
             subdomain = url.hostname.split('.')[0]
 
-            clientsdata = Client.objects.filter(subdomain="zenstack")
+            clientsdata = Client.objects.filter(subdomain=subdomain)
 
             if len(clientsdata) == 0:
                 return Response({"status": 400,
@@ -261,12 +260,12 @@ class UserLoginView(APIView):
                 if not clientid:
                     return Response({"status": 400,
                                     "success": False,
-                                     "messages": "Please enter client id"},
+                                    "messages": "Please enter client id"},
                                     status=status.HTTP_400_BAD_REQUEST)
                 elif not username:
                     return Response({"status": 400,
                                     "success": False,
-                                     "messages": "Please enter username"},
+                                    "messages": "Please enter username"},
                                     status=status.HTTP_400_BAD_REQUEST)
                 elif not password:
                     return Response({"status": 400,
